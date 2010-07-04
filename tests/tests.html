@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+                    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+ 	<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+	<script type="text/javascript" src="qunit.js"></script>
+
+	<script type="text/javascript" charset="utf-8" src='../ID.js'></script>
+
+
+  <script>
+  $(document).ready(function(){
+
+module("ID.js");
+
+test("IsKeyUp / IsKeyDown", function(){
+	expect(2);
+	var id = new ID();
+	var mockEvent = { keyCode: 32 };
+	
+	// mock key press
+	id.onKeyDown_(mockEvent);
+	equal(id.IsKeyDown(ID.SPACE), true, "Expect SPACE bar to be down");	
+	
+	id.onKeyUp_(mockEvent);
+	equal(id.IsKeyUp(ID.SPACE), true, "Expect SPACE bar to be up");
+});
+
+test("IsNewKeyPress", function(){
+	expect(2);
+	var id = new ID();
+	var mockEvent = { keyCode: 32 };
+	
+	// make sure numbers are valid with a few initial iterations
+	id.Update(1/30);
+	id.Update(1/30);
+	
+	id.onKeyDown_(mockEvent);
+	
+	equal(id.IsNewKeyPress(ID.SPACE), true, "Expect SPACE bar to be new key press");
+	id.Update(1/30);
+	equal(id.IsNewKeyPress(ID.SPACE), false, "Expect SPACE bar to NOT be new key press");
+});
+
+test("IsNewKeyRelease", function(){
+	expect(2);
+	var id = new ID();
+	var mockEvent = { keyCode: 32 };
+	
+	// make sure numbers are valid
+	id.Update(1/30);
+	id.Update(1/30);
+	
+	id.onKeyDown_(mockEvent);
+	id.Update(1/30);
+	id.onKeyUp_(mockEvent);
+	equal(id.IsNewKeyRelease(ID.SPACE), true, "Expect SPACE bar to be new key release");
+	id.Update(1/30);
+	equal(id.IsNewKeyRelease(ID.SPACE), false, "Expect SPACE bar to NOT be new key release");
+});
+
+test("TimePressed", function(){
+	expect(2);
+	
+	var id = new ID();
+	var mockEvent = { keyCode: 32 };
+	
+	id.Update(1/30);
+	id.Update(1/30);
+	
+	id.onKeyDown_(mockEvent);
+	
+	// All the Math.floor * / 10000 business is to avoid precision errors
+	
+	id.Update(1/30);
+	equal(
+		Math.floor(id.TimePressed(ID.SPACE) * 10000) / 10000, 
+		Math.floor(1/30 * 10000) / 10000, 
+		"Expect time to be 1/30 (approx 0.0333)");
+	
+	id.Update(1/30);
+	equal(
+		Math.floor(id.TimePressed(ID.SPACE) * 10000) / 10000, 
+		Math.floor(1/30 * 10000) / 10000 * 2,
+		"Expect time to be 2 * 1/30 (approx 0.0666)");
+});
+
+  });
+  </script>
+  
+</head>
+<body>
+ <h1 id="qunit-header">InputDetection (ID)</h1>
+ <h2 id="qunit-banner"></h2>
+ <h2 id="qunit-userAgent"></h2>
+ <ol id="qunit-tests"></ol>
+
+</body>
+</html>

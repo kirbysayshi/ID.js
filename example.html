@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>ID.js Proving Ground</title>
+		
+	</head>
+	<body>
+		
+		<div id="status">start text</div>
+		<div id="grid"></div>
+		
+		<script type="text/javascript" src="ID.js"></script>
+		<script type="text/javascript">
+		var id = new ID();
+		
+		for(var i in ID){
+			if (i !== "prototype" && i !== "EPSILON"){	
+				var d = document.createElement("div");
+				d.id = i;
+				d.innerHTML = "<strong>Key:</strong> " 
+					+ i + " <strong>Pressed:</strong> false <strong>TimePressed:</strong> 0";
+				document.getElementById('grid').appendChild(d);
+			}
+		}
+		
+		// aim for 30 fps
+		var interval = setInterval(function(){
+			id.Update(1/30);
+			document.getElementById("status").innerHTML = "RUNNING";
+			
+			for(var i in ID){
+				if (i !== "prototype" && i !== "EPSILON"){
+					
+					document.getElementById(i).innerHTML = "<strong>Key:</strong> " 
+						+ i + " <strong>Pressed:</strong> false <strong>TimePressed:</strong> 0 <strong>" ;
+					
+					if( id.IsKeyDown(ID[i]) ){
+						document.getElementById(i).innerHTML = 
+							"<strong>Key:</strong> " 
+							+ i + " <strong>Pressed:</strong> " + id.IsKeyDown(ID[i]) + " <strong>TimePressed:</strong> " 
+							+ id.TimePressed(ID[i]);
+					}
+					
+				}
+			}
+			
+		}, 1000 / 30); 
+		
+		// ESCAPE stops execution
+		window.addEventListener("keydown", function(e){ 
+			if(e.keyCode == ID.ESCAPE) {
+				clearInterval(interval);
+				document.getElementById("status").innerHTML = "STOPPED";
+			} 
+		}, false);
+		
+		</script>
+	</body>
+</html>
