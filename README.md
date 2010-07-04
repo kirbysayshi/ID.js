@@ -14,7 +14,7 @@ What ID.js does NOT do for you:
 * Cross-browser event translation / normalization
 * Mouse events (yet!)
 
-This utility has been tested in Firefox 3.6, Chrome 5, and Safari 5. It comes with a few tests written in qunit, so if anyone runs them in another browser, I can update this here.
+This utility has been tested in Firefox 3.6, Chrome 5, and Safari 5. It comes with a few tests written in qunit, so if anyone runs them in another browser, I can update browser compatibility.
 
 HOW TO USE
 ==========
@@ -41,3 +41,9 @@ Example:
 	
 This will print out every key that is pressed in the console, and poll at 30 frames per second.
 
+METHODS
+=======
+
+IsKeyDown/IsKeyUp : returns true/false if the given key is pressed/released
+IsNewKeyPress/IsNewKeyRelease : returns true/false if the given key has been pressed/released during the current iteration
+TimePressed: Returns the time, in seconds, of how long the given key has been held down.
