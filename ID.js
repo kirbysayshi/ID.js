@@ -147,6 +147,15 @@ ID.prototype = {
 		return this.keyCache[k];
 	}
 	/**
+	 * Returns the length of time, in milliseconds, that the key has been held 
+	 *
+	 * @param  int k  the keyCode to test
+	 * @return  float   time in milliseconds
+	 */
+	, TimePressedMs: function(k){
+		return this.keyCache[k] * 1000;
+	}
+	/**
 	 * keyDown event handler
 	 *
 	 * @param  event e  the keyboard event

@@ -46,4 +46,5 @@ METHODS
 
 IsKeyDown/IsKeyUp : returns true/false if the given key is pressed/released
 IsNewKeyPress/IsNewKeyRelease : returns true/false if the given key has been pressed/released during the current iteration
+TimePressedMs: Returns the time, in milliseconds, of how long the given key has been held down.
 TimePressed: Returns the time, in seconds, of how long the given key has been held down.
