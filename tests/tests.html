@@ -16,74 +16,94 @@ module("ID.js");
 
 test("IsKeyUp / IsKeyDown", function(){
 	expect(2);
-	var id = new ID();
-	var mockEvent = { keyCode: 32 };
+	var id = new ID(false);
+	var mockkeydown = { type: "keydown", keyCode: 32, preventDefault: function(){} };
+	var mockkeyup = { type: "keyup", keyCode: 32, preventDefault: function(){} };
 	
 	// mock key press
-	id.onKeyDown_(mockEvent);
+	id.onKeyDown_(mockkeydown);
+	id.Update(1/30);
 	equal(id.IsKeyDown(ID.SPACE), true, "Expect SPACE bar to be down");	
 	
-	id.onKeyUp_(mockEvent);
+	id.onKeyUp_(mockkeyup);
+	id.Update(1/30);
 	equal(id.IsKeyUp(ID.SPACE), true, "Expect SPACE bar to be up");
 });
 
 test("IsNewKeyPress", function(){
 	expect(2);
-	var id = new ID();
-	var mockEvent = { keyCode: 32 };
+	var id = new ID(false);
+	var mockkeydown = { type: "keydown", keyCode: 32, preventDefault: function(){} };
 	
 	// make sure numbers are valid with a few initial iterations
 	id.Update(1/30);
 	id.Update(1/30);
 	
-	id.onKeyDown_(mockEvent);
-	
+	id.onKeyDown_(mockkeydown);
+	id.Update(1/30);
 	equal(id.IsNewKeyPress(ID.SPACE), true, "Expect SPACE bar to be new key press");
+	
 	id.Update(1/30);
 	equal(id.IsNewKeyPress(ID.SPACE), false, "Expect SPACE bar to NOT be new key press");
 });
 
 test("IsNewKeyRelease", function(){
 	expect(2);
-	var id = new ID();
-	var mockEvent = { keyCode: 32 };
+	var id = new ID(false);
+	var mockkeydown = { type: "keydown", keyCode: 32, preventDefault: function(){} };
+	var mockkeyup = { type: "keyup", keyCode: 32, preventDefault: function(){} };
 	
 	// make sure numbers are valid
 	id.Update(1/30);
 	id.Update(1/30);
 	
-	id.onKeyDown_(mockEvent);
+	id.onKeyDown_(mockkeydown);
 	id.Update(1/30);
-	id.onKeyUp_(mockEvent);
+	equal(id.IsNewKeyRelease(ID.SPACE), false, "Expect SPACE bar to NOT new key release");
+	
+	id.onKeyUp_(mockkeyup);
+	id.Update(1/30);
 	equal(id.IsNewKeyRelease(ID.SPACE), true, "Expect SPACE bar to be new key release");
-	id.Update(1/30);
-	equal(id.IsNewKeyRelease(ID.SPACE), false, "Expect SPACE bar to NOT be new key release");
 });
 
 test("TimePressed", function(){
-	expect(2);
+	expect(6);
 	
-	var id = new ID();
-	var mockEvent = { keyCode: 32 };
+	var id = new ID(false);
+	var mockEvent1 = { type: "keydown", keyCode: 32, preventDefault: function(){} };
+	var mockEvent2 = { type: "keydown", keyCode: 13, preventDefault: function(){} };
 	
 	id.Update(1/30);
 	id.Update(1/30);
 	
-	id.onKeyDown_(mockEvent);
+	id.onKeyDown_(mockEvent1);
+	id.onKeyDown_(mockEvent2);
+	id.Update(1/30);
 	
 	// All the Math.floor * / 10000 business is to avoid precision errors
 	
-	id.Update(1/30);
 	equal(
-		Math.floor(id.TimePressed(ID.SPACE) * 10000) / 10000, 
-		Math.floor(1/30 * 10000) / 10000, 
-		"Expect time to be 1/30 (approx 0.0333)");
+		id.TimePressed(ID.SPACE), ID.EPSILON, 
+		"Expect time to be ID.EPSILON (" + ID.EPSILON + ")");
+	equal(
+		id.TimePressed(ID.ENTER), ID.EPSILON, 
+		"Expect time to be ID.EPSILON (" + ID.EPSILON + ")");
+	equal(
+		id.TimePressed(ID.RIGHT_ARROW), 0, 
+		"Expect time to be 0");
 	
 	id.Update(1/30);
 	equal(
 		Math.floor(id.TimePressed(ID.SPACE) * 10000) / 10000, 
-		Math.floor(1/30 * 10000) / 10000 * 2,
-		"Expect time to be 2 * 1/30 (approx 0.0666)");
+		Math.floor(1/30 * 10000) / 10000,
+		"Expect time to be 1/30 (approx 0.0333)");
+	equal(
+		Math.floor(id.TimePressed(ID.ENTER) * 10000) / 10000, 
+		Math.floor(1/30 * 10000) / 10000,
+		"Expect time to be 1/30 (approx 0.0333)");
+	equal(
+		id.TimePressed(ID.RIGHT_ARROW), 0,
+		"Expect time to be 0");
 });
 
   });

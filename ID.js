@@ -21,7 +21,17 @@
  *    distribution.
  */
 
-function ID(){
+/*
+ * TODO: swap EPSILON with the last deltaT?
+ */
+
+/**
+ * Initializes a new InputDetection object.
+ *
+ * @param swallow bool true determines whether to swallow keyboard events, or allow them to propagate
+ * @constructor
+ */
+function ID(swallow){
 	// init key cache
 	this.keyCache = [];
 	for(var i = 0; i < 255; i++){
@@ -32,6 +42,9 @@ function ID(){
 	this.currentKey = 0;
 	this.gameTime = 0;
 	this.lastDelta = 0;
+	this.swallow = swallow == undefined ? true : swallow;
+	
+	this.queue = [];
 	
 	// ready the listeners!
 	var self = this;
@@ -40,28 +53,68 @@ function ID(){
 }
 
 ID.prototype = {
-	
+	/**
+	 * Updates ID by one timestep. Call this method on each iteration of the main loop.
+	 *
+	 * @param  float deltaT  The time increment
+	 * @return  void
+	 */
 	Update: function(deltaT){
 		
+		// update game and lastDelta
 		this.lastDelta = deltaT;
-		this.gameTime += deltaT;
+		this.gameTime += deltaT;		
 		
+		// loop through each key and update status
 		for(var i = 0; i < this.keyCache.length; i++){
 			var c = this.keyCache[i];
 			if( c > 0 ) c += deltaT; 
-			//if( c == -2 ) c =  0; // 0 resets
-			//if( c == -1 ) c = -2; // gives a little more time to be "just released"
 			if( c == -1 ) c =  0; // 0 resets
 			this.keyCache[i] = c;
 		}
 		
+		//process queue, to avoid missing keys that are released right before update
+		for(var j = 0; j < this.queue.length; j++){
+			var ev = this.queue[j];
+			
+			if(ev.type == "keyup"){
+				this.keyCache[ev.keyCode] = -1;
+			}
+			if(ev.type == "keydown"){
+				this.keyCache[ev.keyCode] = (this.keyCache[ev.keyCode] == 0 
+					? ID.EPSILON : this.keyCache[ev.keyCode]);
+			}
+		}
+		
+		// reset queue
+		this.queue = [];
+
 	}
+	/**
+	 * Returns true if the passed key is down
+	 *
+	 * @param  int k  keyCode of the key to test
+	 * @return  bool   true if down, false if not
+	 */
 	, IsKeyDown: function(k){
 		return this.keyCache[k] > 0;
 	}
+	/**
+	 * Returns true if the passed key is up (not down)
+	 *
+	 * @param  int k  keyCode of the key to test
+	 * @return  bool   true if up, false if not
+	 */
 	, IsKeyUp: function(k){
 		return this.keyCache[k] <= 0;
 	}
+	/**
+	 * Returns true if the passed in key is "new", or was pressed 
+	 * between the last update and now.
+	 *
+	 * @param  int k  keyCode to test
+	 * @return  bool   true if new press, false if not
+	 */
 	, IsNewKeyPress: function(k){
 		if( this.keyCache[k] >= ID.EPSILON 
 		&& this.keyCache[k] < this.lastDelta + ID.EPSILON ){
@@ -70,6 +123,13 @@ ID.prototype = {
 			return false;
 		}
 	}
+	/**
+	 * Returns true if the passed in key was released between the 
+	 * last update and now.
+	 *
+	 * @param  string k  desc
+	 * @return  void   desc
+	 */
 	, IsNewKeyRelease: function(k){
 		if( this.keyCache[k] < 0 ){
 			return true;
@@ -77,14 +137,36 @@ ID.prototype = {
 			return false;
 		}
 	}
+	/**
+	 * Returns the length of time, in seconds, that the key has been held 
+	 *
+	 * @param  int k  the keyCode to test
+	 * @return  float   time in seconds
+	 */
 	, TimePressed: function(k){
 		return this.keyCache[k];
 	}
+	/**
+	 * keyDown event handler
+	 *
+	 * @param  event e  the keyboard event
+	 * @private
+	 * @return  void
+	 */
 	, onKeyDown_: function(e){
-		this.keyCache[e.keyCode] = ID.EPSILON;
+		if(this.swallow == true) e.preventDefault();
+		this.queue.push(e);
 	}
+	/**
+	 * keyUp event handler
+	 *
+	 * @param  event e	the keyboard event
+	 * @private
+	 * @return  void
+	 */
 	, onKeyUp_: function(e){
-		this.keyCache[e.keyCode] = -1;
+		if(this.swallow == true) e.preventDefault();
+		this.queue.push(e);
 	}
 }
 
